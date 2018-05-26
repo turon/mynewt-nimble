@@ -65,8 +65,8 @@ ble_npl_eventq_put(struct ble_npl_eventq *evq, struct ble_npl_event *ev)
     q->put(ev);
 }
 
-struct ble_npl_event *
-ble_npl_eventq_get(struct ble_npl_eventq *evq)
+struct ble_npl_event *ble_npl_eventq_get(struct ble_npl_eventq *evq,
+                                         ble_npl_time_t tmo)
 {
     struct ble_npl_event *ev;
     wqueue_t *q = static_cast<wqueue_t *>(evq->q);
@@ -82,10 +82,8 @@ ble_npl_eventq_run(struct ble_npl_eventq *evq)
 {
     struct ble_npl_event *ev;
 
-    ev = ble_npl_eventq_get(evq);
-    assert(ev->ev_cb != NULL);
-
-    ev->ev_cb(ev);
+    ev = ble_npl_eventq_get(evq, BLE_NPL_TIME_FOREVER);
+    ble_npl_event_run(ev);
 }
 
 
@@ -118,6 +116,14 @@ void
 ble_npl_event_set_arg(struct ble_npl_event *ev, void *arg)
 {
     ev->ev_arg = arg;
+}
+
+void
+ble_npl_event_run(struct ble_npl_event *ev)
+{
+    assert(ev->ev_cb != NULL);
+
+    ev->ev_cb(ev);
 }
 
 }

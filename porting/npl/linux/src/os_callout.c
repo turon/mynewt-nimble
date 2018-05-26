@@ -62,18 +62,23 @@ void ble_npl_callout_init(struct ble_npl_callout *c,
     timer_create(CLOCK_REALTIME, &event, &c->c_timer);
 }
 
+bool ble_npl_callout_is_active(struct ble_npl_callout *c)
+{
+    return (c->c_timer != NULL);
+}
+
 int ble_npl_callout_inited(struct ble_npl_callout *c)
 {
     return (c->c_timer != NULL);
 }
 
-int ble_npl_callout_reset(struct ble_npl_callout *c, 
-                          ble_npl_time_t ticks)
+ble_npl_error_t ble_npl_callout_reset(struct ble_npl_callout *c,
+				      ble_npl_time_t ticks)
 {
     struct itimerspec       its;
 
     if (ticks < 0) {
-        return OS_EINVAL;
+        return BLE_NPL_EINVAL;
     }
 
     if (ticks == 0) {
@@ -89,7 +94,7 @@ int ble_npl_callout_reset(struct ble_npl_callout *c,
     its.it_value.tv_nsec %= 1000000000;
     timer_settime(c->c_timer, 0, &its, NULL);
 
-    return OS_OK;
+    return BLE_NPL_OK;
 }
 
 int ble_npl_callout_queued(struct ble_npl_callout *c)
