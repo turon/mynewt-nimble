@@ -648,6 +648,7 @@ ble_ll_sched_master_new(struct ble_ll_conn_sm *connsm,
     OS_ENTER_CRITICAL(sr);
 
     /* The schedule item must occur after current running item (if any) */
+    earliest_start = max(earliest_start, ble_ll_sched_get_current_end_time());
     sch->start_time = earliest_start;
     initial_start = earliest_start;
 
