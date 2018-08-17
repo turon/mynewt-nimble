@@ -35,6 +35,12 @@
 /* XXX: this is temporary. Not sure what I want to do here */
 struct hal_timer g_ble_ll_sched_timer;
 
+/* Currently executed item */
+static struct {
+    uint32_t end_time;
+    uint8_t type;
+} g_ble_ll_sched_current;
+
 #ifdef BLE_XCVR_RFCLK
 /* Settling time of crystal, in ticks */
 uint8_t g_ble_ll_sched_xtal_ticks;
@@ -1178,6 +1184,7 @@ void
 ble_ll_sched_run(void *arg)
 {
     struct ble_ll_sched_item *sch;
+    int rc;
 
     /* Look through schedule queue */
     sch = TAILQ_FIRST(&g_ble_ll_sched_q);
@@ -1198,7 +1205,14 @@ ble_ll_sched_run(void *arg)
         /* Remove schedule item and execute the callback */
         TAILQ_REMOVE(&g_ble_ll_sched_q, sch, link);
         sch->enqueued = 0;
-        ble_ll_sched_execute_item(sch);
+        rc = ble_ll_sched_execute_item(sch);
+
+        if (rc == BLE_LL_SCHED_STATE_RUNNING) {
+            g_ble_ll_sched_current.type = sch->sched_type;
+            g_ble_ll_sched_current.end_time = sch->end_time;
+        } else {
+            g_ble_ll_sched_current.type = BLE_LL_SCHED_TYPE_NONE;
+        }
 
         /* Restart if there is an item on the schedule */
         sch = TAILQ_FIRST(&g_ble_ll_sched_q);
@@ -1235,6 +1249,26 @@ ble_ll_sched_next_time(uint32_t *next_event_time)
     OS_EXIT_CRITICAL(sr);
 
     return rc;
+}
+
+uint8_t
+ble_ll_sched_get_current_type(void)
+{
+    if ((int32_t)(g_ble_ll_sched_current.end_time - os_cputime_get32()) > 0) {
+        g_ble_ll_sched_current.type = BLE_LL_SCHED_TYPE_NONE;
+    }
+
+    return g_ble_ll_sched_current.type;
+}
+
+uint32_t
+ble_ll_sched_get_current_end_time(void)
+{
+    if (ble_ll_sched_get_current_type() == BLE_LL_SCHED_TYPE_NONE) {
+        return os_cputime_get32() - 1;
+    }
+
+    return g_ble_ll_sched_current.end_time;
 }
 
 #ifdef BLE_XCVR_RFCLK

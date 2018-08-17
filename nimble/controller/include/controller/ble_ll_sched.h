@@ -20,6 +20,9 @@
 #ifndef H_BLE_LL_SCHED_
 #define H_BLE_LL_SCHED_
 
+#include "os/os.h"
+#include "nimble/ble.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -69,6 +72,7 @@ extern uint8_t g_ble_ll_sched_offset_ticks;
 #define BLE_LL_SCHED_ERR_OVERLAP    (1)
 
 /* Types of scheduler events */
+#define BLE_LL_SCHED_TYPE_NONE      (0)
 #define BLE_LL_SCHED_TYPE_ADV       (1)
 #define BLE_LL_SCHED_TYPE_SCAN      (2)
 #define BLE_LL_SCHED_TYPE_CONN      (3)
@@ -190,6 +194,9 @@ int ble_ll_sched_aux_scan(struct ble_mbuf_hdr *ble_hdr,
 
 int ble_ll_sched_scan_req_over_aux_ptr(uint32_t chan, uint8_t phy_mode);
 #endif
+
+uint8_t ble_ll_sched_get_current_type(void);
+uint32_t ble_ll_sched_get_current_end_time(void);
 
 /* Stop the scheduler */
 void ble_ll_sched_stop(void);
