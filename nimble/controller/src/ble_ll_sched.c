@@ -1272,6 +1272,61 @@ ble_ll_sched_get_current_end_time(void)
     return g_ble_ll_sched_current.end_time;
 }
 
+#if MYNEWT_VAL(BLE_LL_NRF_RAAL_ENABLE)
+int
+ble_ll_sched_nrf_raal(struct ble_ll_sched_item *sch)
+{
+    struct ble_ll_sched_item *entry;
+    uint32_t duration;
+    os_sr_t sr;
+
+    duration = sch->end_time - sch->start_time;
+
+    OS_ENTER_CRITICAL(sr);
+
+    entry = ble_ll_sched_insert_if_empty(sch);
+    if (entry) {
+        os_cputime_timer_stop(&g_ble_ll_sched_timer);
+
+        TAILQ_FOREACH(entry, &g_ble_ll_sched_q, link) {
+            /* Try to insert before current element if possible */
+            if ((int32_t)(sch->end_time - entry->start_time) <= 0) {
+                TAILQ_INSERT_BEFORE(entry, sch, link);
+                break;
+            }
+
+            /* If overlaps current element, move past this element  */
+            if (ble_ll_sched_is_overlap(sch, entry)) {
+                sch->start_time = entry->end_time;
+                sch->end_time = sch->start_time + duration;
+            }
+        }
+
+        /* If already iterated to the end of list, just enter at the end */
+        if (!entry) {
+            TAILQ_INSERT_TAIL(&g_ble_ll_sched_q, sch, link);
+        }
+    }
+
+    entry = TAILQ_FIRST(&g_ble_ll_sched_q);
+
+#ifdef BLE_XCVR_RFCLK
+    /* If we inserted at the head, enable rfclk */
+    if (entry == sch) {
+        ble_ll_xcvr_rfclk_timer_start(sch->start_time);
+    }
+#endif
+
+    OS_EXIT_CRITICAL(sr);
+
+    /* Restart timer */
+    BLE_LL_ASSERT(entry != NULL);
+    os_cputime_timer_start(&g_ble_ll_sched_timer, entry->start_time);
+
+    return 0;
+}
+#endif
+
 #ifdef BLE_XCVR_RFCLK
 /**
  * Checks to see if we need to restart the cputime timer which starts the

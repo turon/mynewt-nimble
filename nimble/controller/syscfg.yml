@@ -300,6 +300,19 @@ syscfg.defs:
             line number where assertion occured.
         value: 0
 
+    BLE_LL_NRF_RAAL_ENABLE:
+        description: >
+            This option enables nRF RAAF support.
+        value: 0
+    BLE_LL_NRF_RAAL_SLOT_LENGTH:
+        description: >
+            Length of slots scheduled for RAAL in continuous mode.
+        value: 6400
+    BLE_LL_NRF_RAAL_ISR_HANDLER_NAME:
+        description: >
+            Name of NRF_RADIO ISR called by RAAL when inside slot.
+        value: 'nrf_802154_radio_irq_handler'
+
 syscfg.vals.BLE_LL_CFG_FEAT_LL_EXT_ADV:
     BLE_LL_CFG_FEAT_LE_CSA2: 1
     BLE_HW_WHITELIST_ENABLE: 0
