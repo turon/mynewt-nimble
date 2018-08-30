@@ -524,6 +524,11 @@ extern uint32_t g_bletest_IVm;
 extern uint32_t g_bletest_IVs;
 #endif
 
+#if MYNEWT_VAL(BLE_LL_NRF_RAAL_ENABLE)
+void ble_ll_nrf_raal_init(void);
+void ble_ll_nrf_raal_radio_isr(void);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
