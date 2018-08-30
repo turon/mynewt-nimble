@@ -301,7 +301,7 @@ ble_hs_startup_set_evmask_tx(void)
         return rc;
     }
 
-    if (version >= BLE_HCI_VER_BCS_4_1) {
+    if (version >= BLE_HCI_VER_BCS_5_0) {
         /**
          * Enable the following events:
          *     0x0000000000800000 Authenticated Payload Timeout Event

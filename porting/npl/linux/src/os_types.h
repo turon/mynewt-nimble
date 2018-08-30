@@ -22,11 +22,14 @@
 
 #include <time.h>
 #include <signal.h>
+#include <stdint.h>
 #include <stdbool.h>
 #include <pthread.h>
 #include <semaphore.h>
 
-#define BLE_NPL_WAIT_FOREVER (-1)
+#define BLE_NPL_OS_ALIGNMENT    4
+#define BLE_NPL_TIME_FOREVER    UINT32_MAX
+#define BLE_NPL_WAIT_FOREVER    BLE_NPL_TIME_FOREVER
 
 /* The highest and lowest task priorities */
 #define OS_TASK_PRI_HIGHEST (sched_get_priority_max(SCHED_RR))

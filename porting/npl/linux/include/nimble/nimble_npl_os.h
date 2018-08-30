@@ -30,10 +30,6 @@
 extern "C" {
 #endif
 
-#define BLE_NPL_OS_ALIGNMENT    4
-
-#define BLE_NPL_TIME_FOREVER    INT32_MAX
-
 #define SYSINIT_PANIC_MSG(msg) __assert_fail(msg, __FILE__, __LINE__, __func__)
 
 #define SYSINIT_PANIC_ASSERT_MSG(rc, msg) do \

@@ -54,13 +54,33 @@ public:
         pthread_mutex_unlock(&m_mutex);
     }
 
-    T get() {
+    T get(ble_npl_time_t timeout_ms) {
+        T item = NULL;
+
         pthread_mutex_lock(&m_mutex);
-        while (m_queue.size() == 0) {
-            pthread_cond_wait(&m_condv, &m_mutex);
+
+        if (timeout_ms == BLE_NPL_WAIT_FOREVER)
+        {
+            while (m_queue.size() == 0) {
+                pthread_cond_wait(&m_condv, &m_mutex);
+            }
+            item = m_queue.front();
+            m_queue.pop_front();
         }
-        T item = m_queue.front();
-        m_queue.pop_front();
+        else
+        {
+            struct timespec max_wait = {0, 0};
+            const int gettime_rv = clock_gettime(CLOCK_REALTIME, &max_wait);
+            max_wait.tv_nsec += timeout_ms * 1000000;
+
+            pthread_cond_timedwait(&m_condv, &m_mutex, &max_wait);
+            if (m_queue.size() > 0)
+            {
+                item = m_queue.front();
+                if (item) m_queue.pop_front();
+            }
+        }
+
         pthread_mutex_unlock(&m_mutex);
         return item;
     }
