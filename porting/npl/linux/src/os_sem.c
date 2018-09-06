@@ -73,7 +73,7 @@ ble_npl_sem_pend(struct ble_npl_sem *sem, uint32_t timeout)
     wait.tv_nsec += (timeout % 1000) * 1000000;
     wait.tv_nsec %= 1000000000;
 
-    if (timeout == BLE_NPL_WAIT_FOREVER) {
+    if (timeout == BLE_NPL_TIME_FOREVER) {
         err = sem_wait(&sem->lock);
     }
     else

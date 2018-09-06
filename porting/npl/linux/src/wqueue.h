@@ -59,7 +59,7 @@ public:
 
         pthread_mutex_lock(&m_mutex);
 
-        if (timeout_ms == BLE_NPL_WAIT_FOREVER)
+        if (timeout_ms == BLE_NPL_TIME_FOREVER)
         {
             while (m_queue.size() == 0) {
                 pthread_cond_wait(&m_condv, &m_mutex);

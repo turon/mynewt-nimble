@@ -288,8 +288,8 @@ ble_npl_hw_enter_critical(void)
 static inline void
 ble_npl_hw_exit_critical(uint32_t ctx)
 {
+    (void)ctx;
     vPortExitCritical();
-
 }
 
 #ifdef __cplusplus
