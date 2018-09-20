@@ -37,6 +37,8 @@ extern "C" {
 
 #define BLE_NPL_TIME_FOREVER    portMAX_DELAY
 
+#define OS_TICKS_PER_SEC        (configTICK_RATE_HZ)
+
 /* This should be compatible with TickType_t */
 typedef uint32_t ble_npl_time_t;
 typedef int32_t ble_npl_stime_t;
