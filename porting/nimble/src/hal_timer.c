@@ -24,6 +24,7 @@
 #include "os/os.h"
 #include "nrfx.h"
 #include "hal/hal_timer.h"
+#include "nimble/nimble_npl_os.h"
 
 #define __HAL_DISABLE_INTERRUPTS(x)                     \
     do {                                                \
