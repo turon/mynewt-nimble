@@ -24,8 +24,8 @@
 typedef void (*irq_handler_t)(void);
 
 static uint32_t radio_isr_addr;
-static uint32_t rng_isr_addr;
-static uint32_t rtc0_isr_addr;
+//static uint32_t rng_isr_addr;
+//static uint32_t rtc0_isr_addr;
 
 /* Some interrupt handlers required for NimBLE radio driver */
 
@@ -41,13 +41,13 @@ RNG_IRQHandler(void)
 {
     ((irq_handler_t)rng_isr_addr)();
 }
-*/
 
 void
 RTC0_IRQHandler(void)
 {
     ((irq_handler_t)rtc0_isr_addr)();
 }
+*/
 
 /* This is called by NimBLE radio driver to set interrupt handlers */
 void
@@ -61,9 +61,9 @@ npl_freertos_hw_set_isr(int irqn, uint32_t addr)
     case RNG_IRQn:
         rng_isr_addr = addr;
         break;
-    */
     case RTC0_IRQn:
         rtc0_isr_addr = addr;
         break;
+    */
     }
 }

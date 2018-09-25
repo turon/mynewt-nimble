@@ -47,7 +47,7 @@ nimble_port_init(void)
     ble_store_ram_init();
 
 #if NIMBLE_CFG_CONTROLLER
-    hal_timer_init(5, NULL);
+    //hal_timer_init(5, NULL);
     os_cputime_init(32768);
     ble_ll_init();
     ble_hci_ram_init();

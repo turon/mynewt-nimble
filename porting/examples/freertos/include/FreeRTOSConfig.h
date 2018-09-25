@@ -91,15 +91,15 @@
 
 #define configTICK_SOURCE FREERTOS_USE_RTC
 
-#define configUSE_PREEMPTION 1
-#define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
-#define configUSE_TICKLESS_IDLE 1
+#define configUSE_PREEMPTION                                                      1
+#define configUSE_PORT_OPTIMISED_TASK_SELECTION                                   1
+#define configUSE_TICKLESS_IDLE                                                   1
 #define configUSE_TICKLESS_IDLE_SIMPLE_DEBUG                                      1 /* See into vPortSuppressTicksAndSleep source code for explanation */
 #define configCPU_CLOCK_HZ                                                        ( SystemCoreClock )
 #define configTICK_RATE_HZ                                                        1000
 #define configMAX_PRIORITIES                                                      ( 4 )
 #define configMINIMAL_STACK_SIZE                                                  ( 60 )
-#define configTOTAL_HEAP_SIZE                                                     ( 24*1024 )
+#define configTOTAL_HEAP_SIZE                                                     ( 6144 )
 #define configMAX_TASK_NAME_LEN                                                   ( 4 )
 #define configUSE_16_BIT_TICKS                                                    0
 #define configIDLE_SHOULD_YIELD                                                   1
@@ -208,7 +208,7 @@ standard names - or at least those used in the unmodified vector table. */
 /* Code below should be only used by the compiler, and not the assembler. */
 #if !(defined(__ASSEMBLY__) || defined(__ASSEMBLER__))
     #include "nrf.h"
-    #include "nrf_assert.h"
+//    #include "nrf_assert.h"
 
     /* This part of definitions may be problematic in assembly - it uses definitions from files that are not assembly compatible. */
     /* Cortex-M specific definitions. */
