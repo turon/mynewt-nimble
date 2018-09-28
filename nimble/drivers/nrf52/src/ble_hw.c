@@ -281,6 +281,7 @@ ble_hw_encrypt_block(struct ble_encryption_block *ecb)
     return rc;
 }
 
+#if 0
 /**
  * Random number generator ISR.
  */
@@ -404,6 +405,7 @@ ble_hw_rng_read(void)
 
     return rnum;
 }
+#endif
 
 #if (MYNEWT_VAL(BLE_LL_CFG_FEAT_LL_PRIVACY))
 /**
