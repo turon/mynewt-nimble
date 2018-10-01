@@ -47,5 +47,5 @@ nimble_port_freertos_init(TaskFunction_t host_task_fn)
      * default queue it is just easier to make separate task which does this.
      */
     xTaskCreate(host_task_fn, "ble", configMINIMAL_STACK_SIZE + 400,
-                NULL, tskIDLE_PRIORITY + 1, &host_task_h);
+                NULL, tskIDLE_PRIORITY + 2, &host_task_h);
 }

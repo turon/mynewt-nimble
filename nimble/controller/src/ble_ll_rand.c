@@ -30,7 +30,6 @@
 #include "trng/trng.h"
 #endif
 
-#if 0
 #if MYNEWT_VAL(TRNG)
 static struct trng_dev *g_trng;
 #else
@@ -183,63 +182,4 @@ ble_ll_rand_init(void)
     ble_hw_rng_init(ble_ll_rand_sample, 1);
 #endif
     return 0;
-}
-#endif
-
-
-/**
- * Initialize LL random number generation. Should be called only once on
- * initialization.
- *
- * @return int
- */
-int
-ble_ll_rand_init(void)
-{
-    return 0;
-}
-
-/**
- * Start the generation of random numbers
- *
- * @return int
- */
-int
-ble_ll_rand_start(void)
-{
-    return 0;
-}
-
-/* Get 'len' bytes of random data */
-int
-ble_ll_rand_data_get(uint8_t *buf, uint8_t len)
-{
-    // return 0;
-    return otPlatRandomGetTrue(buf, len) ? BLE_ERR_UNSPECIFIED : BLE_ERR_SUCCESS;
-}
-
-/**
- * Called to obtain a "prand" as defined in core V4.2 Vol 6 Part B 1.3.2.2
- *
- * @param prand
- */
-void
-ble_ll_rand_prand_get(uint8_t *prand)
-{
-    uint16_t sum;
-
-    while (1) {
-        /* Get 24 bits of random data */
-        ble_ll_rand_data_get(prand, 3);
-
-        /* Prand cannot be all zeros or 1's. */
-        sum = prand[0] + prand[1] + prand[2];
-        if ((sum != 0) && (sum != (3 * 0xff))) {
-            break;
-        }
-    }
-
-    /* Upper two bits must be 01 */
-    prand[2] &= ~0xc0;
-    prand[2] |= 0x40;
 }
