@@ -411,6 +411,22 @@
 #define MYNEWT_VAL_BLE_LP_CLOCK (1)
 #endif
 
+/** net/nimble/controller/raal */
+
+#ifndef MYNEWT_VAL_BLE_LL_NRF_RAAL_ENABLE
+#define MYNEWT_VAL_BLE_LL_NRF_RAAL_ENABLE (1)
+#endif
+
+#ifndef MYNEWT_VAL_BLE_LL_NRF_RAAL_SLOT_LENGTH
+#define MYNEWT_VAL_BLE_LL_NRF_RAAL_SLOT_LENGTH (6400)
+#endif
+
+#ifndef MYNEWT_VAL_BLE_LL_NRF_RAAL_ISR_HANDLER_NAME
+#define MYNEWT_VAL_BLE_LL_NRF_RAAL_ISR_HANDLER_NAME  nrf_802154_radio_irq_handler
+#endif
+
+/** */
+
 #ifndef MYNEWT_VAL_BLE_NUM_COMP_PKT_RATE
 #define MYNEWT_VAL_BLE_NUM_COMP_PKT_RATE (((2000 * OS_TICKS_PER_SEC) / 1000))
 #endif
