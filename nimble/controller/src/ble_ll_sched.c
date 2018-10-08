@@ -1206,6 +1206,10 @@ ble_ll_sched_run(void *arg)
         /* Remove schedule item and execute the callback */
         TAILQ_REMOVE(&g_ble_ll_sched_q, sch, link);
         sch->enqueued = 0;
+
+        g_ble_ll_sched_current.type = sch->sched_type;
+        g_ble_ll_sched_current.end_time = sch->end_time;
+
         rc = ble_ll_sched_execute_item(sch);
 
         if (rc == BLE_LL_SCHED_STATE_RUNNING) {
@@ -1255,7 +1259,7 @@ ble_ll_sched_next_time(uint32_t *next_event_time)
 uint8_t
 ble_ll_sched_get_current_type(void)
 {
-    if ((int32_t)(g_ble_ll_sched_current.end_time - os_cputime_get32()) > 0) {
+    if (((int32_t)os_cputime_get32() - (int32_t)g_ble_ll_sched_current.end_time) > 0) {
         g_ble_ll_sched_current.type = BLE_LL_SCHED_TYPE_NONE;
     }
 
