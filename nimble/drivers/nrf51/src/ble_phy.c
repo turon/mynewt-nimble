@@ -1475,16 +1475,18 @@ ble_phy_resolv_list_disable(void)
 }
 #endif
 
-#ifdef BLE_XCVR_RFCLK
 void
 ble_phy_rfclk_enable(void)
 {
+#ifdef BLE_XCVR_RFCLK
     NRF_CLOCK->TASKS_HFCLKSTART = 1;
+#endif
 }
 
 void
 ble_phy_rfclk_disable(void)
 {
+#ifdef BLE_XCVR_RFCLK
     NRF_CLOCK->TASKS_HFCLKSTOP = 1;
-}
 #endif
+}

@@ -418,7 +418,7 @@
 #endif
 
 #ifndef MYNEWT_VAL_BLE_LL_NRF_RAAL_SLOT_LENGTH
-#define MYNEWT_VAL_BLE_LL_NRF_RAAL_SLOT_LENGTH (6400)
+#define MYNEWT_VAL_BLE_LL_NRF_RAAL_SLOT_LENGTH (64000)
 #endif
 
 #ifndef MYNEWT_VAL_BLE_LL_NRF_RAAL_ISR_HANDLER_NAME
@@ -437,7 +437,7 @@
 
 /* Overridden by hw/bsp/nrf52840pdk (defined by net/nimble/controller) */
 #ifndef MYNEWT_VAL_BLE_XTAL_SETTLE_TIME
-#define MYNEWT_VAL_BLE_XTAL_SETTLE_TIME (1500)
+#define MYNEWT_VAL_BLE_XTAL_SETTLE_TIME (0)
 #endif
 
 /*** net/nimble/host */

@@ -1389,12 +1389,12 @@ ble_phy_init(void)
     /* Make sure HFXO is started */
     NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
     NRF_CLOCK->TASKS_HFCLKSTART = 1;
-    os_tmo = os_time_get() + (5 * (1000 / OS_TICKS_PER_SEC));
+    os_tmo = os_cputime_get32() + (5 * (1000 / OS_TICKS_PER_SEC));
     while (1) {
         if (NRF_CLOCK->EVENTS_HFCLKSTARTED) {
             break;
         }
-        if ((int32_t)(os_time_get() - os_tmo) > 0) {
+        if ((int32_t)(os_cputime_get32() - os_tmo) > 0) {
             return BLE_PHY_ERR_INIT;
         }
     }
@@ -2034,19 +2034,21 @@ void ble_phy_disable_dtm(void)
     NRF_RADIO->PCNF1 |= RADIO_PCNF1_WHITEEN_Msk;
 }
 #endif
-#ifdef BLE_XCVR_RFCLK
 void
 ble_phy_rfclk_enable(void)
 {
+#ifdef BLE_XCVR_RFCLK
     NRF_CLOCK->TASKS_HFCLKSTART = 1;
+#endif
 }
 
 void
 ble_phy_rfclk_disable(void)
 {
+#ifdef BLE_XCVR_RFCLK
     NRF_CLOCK->TASKS_HFCLKSTOP = 1;
-}
 #endif
+}
 
 #if MYNEWT_VAL(BLE_LL_NRF_RAAL_ENABLE)
 void
