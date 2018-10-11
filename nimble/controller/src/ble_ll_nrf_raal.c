@@ -55,7 +55,9 @@ extern void nrf_raal_timeslot_ended(void);
 static inline bool
 ble_ll_nrf_raal_slot_granted(void)
 {
-    return ble_ll_sched_get_current_type() == BLE_LL_SCHED_TYPE_NRF_RAAL;
+    uint8_t slot_type = ble_ll_sched_get_current_type();
+    return ((slot_type == BLE_LL_SCHED_TYPE_NRF_RAAL) ||
+	    ((slot_type == BLE_LL_SCHED_TYPE_NONE) && g_ble_ll_nrf_raal_continuous));
 }
 
 static void
@@ -159,6 +161,12 @@ nrf_raal_uninit(void)
     /* XXX nothing to do? */
 }
 
+bool
+nrf_raal_timeslot_is_granted(void)
+{
+    return ble_ll_nrf_raal_slot_granted();
+}
+
 void
 nrf_raal_continuous_mode_enter(void)
 {
@@ -171,6 +179,10 @@ void
 nrf_raal_continuous_mode_exit(void)
 {
     g_ble_ll_nrf_raal_continuous = 0;
+
+    if (nrf_raal_timeslot_is_granted()) {
+        nrf_raal_timeslot_ended();
+    }
 }
 
 bool
@@ -187,11 +199,6 @@ nrf_raal_timeslot_request(uint32_t length_us)
     return (int32_t)(end - ble_ll_sched_get_current_end_time()) < 0;
 }
 
-bool
-nrf_raal_timeslot_is_granted(void)
-{
-    return ble_ll_nrf_raal_slot_granted();
-}
 
 uint32_t
 nrf_raal_timeslot_us_left_get(void)
