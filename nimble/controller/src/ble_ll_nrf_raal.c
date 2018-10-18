@@ -27,6 +27,8 @@
 
 #if MYNEWT_VAL(BLE_LL_NRF_RAAL_ENABLE)
 
+#include <gpio.h>
+
 /*
  * Number of ticks to add at the end of scheduled item to reconfigure radio
  * after exiting from "external" slot.
@@ -85,6 +87,7 @@ static void
 ble_ll_nrf_raal_slot_enter(void)
 {
     if (!g_ble_ll_nrf_raal_critical) {
+        gpio_clear(LED_3);
         nrf_raal_timeslot_started();
         return;
     }
@@ -108,6 +111,7 @@ static void
 ble_ll_nrf_raal_slot_exit(void)
 {
     if (!g_ble_ll_nrf_raal_critical) {
+        gpio_set(LED_3);
         nrf_raal_timeslot_ended();
         return;
     }
@@ -152,7 +156,8 @@ ble_ll_nrf_raal_slot_sched_cb(struct ble_ll_sched_item *sch)
 void
 nrf_raal_init(void)
 {
-    /* XXX nothing to do? */
+    gpio_init(LED_3);
+    gpio_set(LED_3);
 }
 
 void

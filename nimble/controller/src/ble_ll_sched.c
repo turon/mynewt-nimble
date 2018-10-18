@@ -32,6 +32,8 @@
 #include "controller/ble_ll_trace.h"
 #include "ble_ll_conn_priv.h"
 
+#include <gpio.h>
+
 /* XXX: this is temporary. Not sure what I want to do here */
 struct hal_timer g_ble_ll_sched_timer;
 
@@ -1210,6 +1212,12 @@ ble_ll_sched_run(void *arg)
         g_ble_ll_sched_current.type = sch->sched_type;
         g_ble_ll_sched_current.end_time = sch->end_time;
 
+        if (sch->sched_type == BLE_LL_SCHED_TYPE_NRF_RAAL) {
+            gpio_clear(LED_2); // LOW ON THREAD
+        } else {
+            gpio_set(LED_2);   // HIGH ON BLE
+        }
+
         rc = ble_ll_sched_execute_item(sch);
 
         if (rc == BLE_LL_SCHED_STATE_RUNNING) {
@@ -1614,6 +1622,7 @@ ble_ll_sched_stop(void)
 int
 ble_ll_sched_init(void)
 {
+    gpio_init(LED_2);
     /*
      * Initialize max early to large negative number. This is used
      * to determine the worst-case "early" time the schedule was called. Dont
