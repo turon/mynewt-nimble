@@ -28,14 +28,13 @@
 ble_npl_error_t
 ble_npl_mutex_init(struct ble_npl_mutex *mu)
 {
-    pthread_mutexattr_t mu_attr;
-
     if (!mu) {
         return BLE_NPL_INVALID_PARAM;
     }
 
-    pthread_mutexattr_settype(&mu_attr, PTHREAD_MUTEX_RECURSIVE_NP);
-    pthread_mutex_init(&mu->lock, &mu_attr);
+    pthread_mutexattr_init(&mu->attr);
+    pthread_mutexattr_settype(&mu->attr, PTHREAD_MUTEX_RECURSIVE_NP);
+    pthread_mutex_init(&mu->lock, &mu->attr);
 
     return BLE_NPL_OK;
 }
