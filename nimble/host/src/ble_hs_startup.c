@@ -301,6 +301,8 @@ ble_hs_startup_set_evmask_tx(void)
         return rc;
     }
 
+    /* Do not send this to btvirt virtual external controller. */
+#if MYNEWT_VAL(BLE_DEVICE)
     if (version >= BLE_HCI_VER_BCS_4_1) {
         /**
          * Enable the following events:
@@ -314,6 +316,7 @@ ble_hs_startup_set_evmask_tx(void)
             return rc;
         }
     }
+#endif
 
     return 0;
 }
