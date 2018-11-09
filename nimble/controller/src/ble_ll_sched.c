@@ -1212,6 +1212,10 @@ ble_ll_sched_run(void *arg)
         g_ble_ll_sched_current.type = sch->sched_type;
         g_ble_ll_sched_current.end_time = sch->end_time;
 
+	gpio_clear(LED_2); // Pulse every item
+	gpio_set(LED_2);
+	gpio_clear(LED_2);
+
         if (sch->sched_type == BLE_LL_SCHED_TYPE_NRF_RAAL) {
             gpio_clear(LED_2); // LOW ON THREAD
         } else {

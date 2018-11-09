@@ -186,6 +186,7 @@ nrf_raal_continuous_mode_exit(void)
     g_ble_ll_nrf_raal_continuous = 0;
 
     if (nrf_raal_timeslot_is_granted()) {
+        gpio_set(LED_3);
         nrf_raal_timeslot_ended();
     }
 }
