@@ -37,6 +37,8 @@
 #include "core_cm4.h"
 #endif
 
+#include <gpio.h>
+
 /*
  * NOTE: This code uses a couple of PPI channels so care should be taken when
  *       using PPI somewhere else.
@@ -1329,6 +1331,11 @@ ble_phy_dbg_time_setup(void)
 static void
 ble_phy_nrf_radio_init(void)
 {
+#if DEBUG_PIN_802154_MODE >= 0
+    gpio_init(DEBUG_PIN_802154_MODE);
+    gpio_clear(DEBUG_PIN_802154_MODE);
+#endif
+  
     /* Toggle peripheral power to reset (just in case) */
     NRF_RADIO->POWER = 0;
     NRF_RADIO->POWER = 1;

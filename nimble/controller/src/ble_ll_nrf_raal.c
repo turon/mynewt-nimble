@@ -87,7 +87,7 @@ static void
 ble_ll_nrf_raal_slot_enter(void)
 {
     if (!g_ble_ll_nrf_raal_critical) {
-        gpio_clear(LED_3);
+        //gpio_clear(LED_3);
         nrf_raal_timeslot_started();
         return;
     }
@@ -111,7 +111,7 @@ static void
 ble_ll_nrf_raal_slot_exit(void)
 {
     if (!g_ble_ll_nrf_raal_critical) {
-        gpio_set(LED_3);
+        //gpio_set(LED_3);
         nrf_raal_timeslot_ended();
         return;
     }
@@ -137,6 +137,8 @@ ble_ll_nrf_raal_slot_end_tmr_cb(void *arg)
 
     /* Schedule next slot */
     ble_ll_nrf_raal_slot_schedule();
+
+    ble_phy_rfclk_enable();
 }
 
 static int
@@ -156,8 +158,8 @@ ble_ll_nrf_raal_slot_sched_cb(struct ble_ll_sched_item *sch)
 void
 nrf_raal_init(void)
 {
-    gpio_init(LED_3);
-    gpio_set(LED_3);
+    //gpio_init(LED_3);
+    //gpio_set(LED_3);
 }
 
 void
@@ -186,7 +188,7 @@ nrf_raal_continuous_mode_exit(void)
     g_ble_ll_nrf_raal_continuous = 0;
 
     if (nrf_raal_timeslot_is_granted()) {
-        gpio_set(LED_3);
+        //gpio_set(LED_3);
         nrf_raal_timeslot_ended();
     }
 }

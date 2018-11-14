@@ -34,6 +34,8 @@
 
 #include <gpio.h>
 
+#define DEFAULT_RAAL_SLOT_OFFSET   5000
+
 /* XXX: this is temporary. Not sure what I want to do here */
 struct hal_timer g_ble_ll_sched_timer;
 
@@ -1311,11 +1313,13 @@ ble_ll_sched_nrf_raal(struct ble_ll_sched_item *sch)
                 break;
             }
 
-            /* If overlaps current element, move past this element  */
-            if (ble_ll_sched_is_overlap(sch, entry)) {
-                sch->start_time = entry->end_time;
-                sch->end_time = sch->start_time + duration;
-            }
+	    /* If overlaps current element, 
+               move past this element with 5ms offset  */
+	    if (ble_ll_sched_is_overlap(sch, entry)) {
+	        sch->start_time = entry->end_time +
+		  os_cputime_usecs_to_ticks(DEFAULT_RAAL_SLOT_OFFSET);
+		sch->end_time = sch->start_time + duration;
+	    }
         }
 
         /* If already iterated to the end of list, just enter at the end */
