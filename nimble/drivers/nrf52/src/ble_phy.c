@@ -1336,10 +1336,6 @@ ble_phy_nrf_radio_init(void)
     gpio_clear(DEBUG_PIN_802154_MODE);
 #endif
   
-    /* Toggle peripheral power to reset (just in case) */
-    NRF_RADIO->POWER = 0;
-    NRF_RADIO->POWER = 1;
-
     /* Disable all interrupts */
     NRF_RADIO->INTENCLR = NRF_RADIO_IRQ_MASK_ALL;
 
@@ -1372,6 +1368,18 @@ ble_phy_nrf_radio_init(void)
 
     /* Configure TX power */
     NRF_RADIO->TXPOWER = g_ble_phy_data.phy_txpwr_dbm;
+
+    /* Captures tx/rx start in timer0 cc 1 and tx/rx end in timer0 cc 2 */
+    NRF_PPI->CHENSET = PPI_CHEN_CH26_Msk | PPI_CHEN_CH27_Msk;
+
+    /* Set isr in vector table and enable interrupt */
+    NVIC_SetPriority(RADIO_IRQn, 0);
+#if MYNEWT
+    NVIC_SetVector(RADIO_IRQn, (uint32_t)ble_phy_isr);
+#else
+    ble_npl_hw_set_isr(RADIO_IRQn, (uint32_t)ble_phy_isr);
+#endif
+    NVIC_EnableIRQ(RADIO_IRQn);
 }
 
 /**
@@ -1414,7 +1422,7 @@ ble_phy_init(void)
     ble_phy_nrf_radio_init();
 
     /* Captures tx/rx start in timer0 cc 1 and tx/rx end in timer0 cc 2 */
-    NRF_PPI->CHENSET = PPI_CHEN_CH26_Msk | PPI_CHEN_CH27_Msk;
+    //NRF_PPI->CHENSET = PPI_CHEN_CH26_Msk | PPI_CHEN_CH27_Msk;
 
 #if (MYNEWT_VAL(BLE_LL_CFG_FEAT_LE_ENCRYPTION) == 1)
     NRF_CCM->INTENCLR = 0xffffffff;
@@ -2061,6 +2069,7 @@ ble_phy_rfclk_disable(void)
 void
 ble_phy_nrf_raal_slot_enter(void)
 {
+    ble_phy_disable();
     g_ble_phy_nrf_raal_in_slot = 1;
 }
 
@@ -2068,6 +2077,7 @@ void
 ble_phy_nrf_raal_slot_exit(void)
 {
     g_ble_phy_nrf_raal_in_slot = 0;
+    ble_phy_disable();
     ble_phy_nrf_radio_init();
 }
 #endif

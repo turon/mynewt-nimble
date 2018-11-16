@@ -34,8 +34,6 @@
 
 #include <gpio.h>
 
-#define DEFAULT_RAAL_SLOT_OFFSET   5000
-
 /* XXX: this is temporary. Not sure what I want to do here */
 struct hal_timer g_ble_ll_sched_timer;
 
@@ -652,7 +650,7 @@ ble_ll_sched_master_new(struct ble_ll_conn_sm *connsm,
     OS_ENTER_CRITICAL(sr);
 
     /* The schedule item must occur after current running item (if any) */
-    earliest_start = max(earliest_start, ble_ll_sched_get_current_end_time());
+    earliest_start = max(earliest_start, ble_ll_sched_get_current_end_time() + 1);
     sch->start_time = earliest_start;
     initial_start = earliest_start;
 
@@ -848,14 +846,23 @@ ble_ll_sched_adv_new(struct ble_ll_sched_item *sch, ble_ll_sched_adv_new_cb cb,
     os_sr_t sr;
     uint32_t adv_start;
     uint32_t duration;
+    uint32_t cur_offset;
     struct ble_ll_sched_item *entry;
     struct ble_ll_sched_item *orig;
+
+    OS_ENTER_CRITICAL(sr);
+
+    /* Make sure we don't overlap with current element */
+    cur_offset = (int32_t)(ble_ll_sched_get_current_end_time() + 1 - sch->start_time);
+    if (cur_offset > 0) {
+        sch->start_time += cur_offset;
+        sch->end_time += cur_offset;
+    }
 
     /* Get length of schedule item */
     duration = sch->end_time - sch->start_time;
     orig = sch;
 
-    OS_ENTER_CRITICAL(sr);
     entry = ble_ll_sched_insert_if_empty(sch);
     if (!entry) {
         rc = 0;
@@ -921,11 +928,26 @@ ble_ll_sched_adv_reschedule(struct ble_ll_sched_item *sch, uint32_t *start,
     uint32_t orig_start;
     uint32_t duration;
     uint32_t rand_ticks;
+    int32_t cur_offset;
     struct ble_ll_sched_item *entry;
     struct ble_ll_sched_item *next_sch;
     struct ble_ll_sched_item *before;
     struct ble_ll_sched_item *start_overlap;
     struct ble_ll_sched_item *end_overlap;
+
+    OS_ENTER_CRITICAL(sr);
+
+    /* Make sure we don't overlap with current element */
+    cur_offset = (int32_t)(ble_ll_sched_get_current_end_time() + 1 - sch->start_time);
+    if (cur_offset > 0) {
+        /* We can't move this item later than allowed margin */
+        if (cur_offset > max_delay_ticks) {
+            rc = -1;
+            goto done;
+        }
+        sch->start_time += cur_offset;
+        sch->end_time += cur_offset;
+    }
 
     /* Get length of schedule item */
     duration = sch->end_time - sch->start_time;
@@ -938,7 +960,6 @@ ble_ll_sched_adv_reschedule(struct ble_ll_sched_item *sch, uint32_t *start,
     end_overlap = NULL;
     before = NULL;
     rc = 0;
-    OS_ENTER_CRITICAL(sr);
 
     entry = ble_ll_sched_insert_if_empty(sch);
     if (entry) {
@@ -1031,6 +1052,7 @@ ble_ll_sched_adv_reschedule(struct ble_ll_sched_item *sch, uint32_t *start,
 #endif
     }
 
+done:
     OS_EXIT_CRITICAL(sr);
 
     sch = TAILQ_FIRST(&g_ble_ll_sched_q);
@@ -1050,6 +1072,12 @@ ble_ll_sched_adv_resched_pdu(struct ble_ll_sched_item *sch)
 
     lls = ble_ll_state_get();
     if ((lls == BLE_LL_STATE_ADV) || (lls == BLE_LL_STATE_CONNECTION)) {
+        goto adv_resched_pdu_fail;
+    }
+
+    /* Make sure we don't overlap with current element */
+    if ((ble_ll_sched_get_current_type() != BLE_LL_SCHED_TYPE_ADV) &&
+            (int32_t)(ble_ll_sched_get_current_end_time() + 1 - sch->start_time) > 0) {
         goto adv_resched_pdu_fail;
     }
 
@@ -1226,10 +1254,7 @@ ble_ll_sched_run(void *arg)
 
         rc = ble_ll_sched_execute_item(sch);
 
-        if (rc == BLE_LL_SCHED_STATE_RUNNING) {
-            g_ble_ll_sched_current.type = sch->sched_type;
-            g_ble_ll_sched_current.end_time = sch->end_time;
-        } else {
+        if (rc != BLE_LL_SCHED_STATE_RUNNING) {
             g_ble_ll_sched_current.type = BLE_LL_SCHED_TYPE_NONE;
         }
 
@@ -1313,13 +1338,11 @@ ble_ll_sched_nrf_raal(struct ble_ll_sched_item *sch)
                 break;
             }
 
-	    /* If overlaps current element, 
-               move past this element with 5ms offset  */
-	    if (ble_ll_sched_is_overlap(sch, entry)) {
-	        sch->start_time = entry->end_time +
-		  os_cputime_usecs_to_ticks(DEFAULT_RAAL_SLOT_OFFSET);
-		sch->end_time = sch->start_time + duration;
-	    }
+            /* If overlaps current element, move to next slot */
+            if (ble_ll_sched_is_overlap(sch, entry)) {
+                sch->start_time += duration;
+                sch->end_time += duration;
+            }
         }
 
         /* If already iterated to the end of list, just enter at the end */

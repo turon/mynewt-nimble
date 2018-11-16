@@ -27,8 +27,6 @@
 
 #if MYNEWT_VAL(BLE_LL_NRF_RAAL_ENABLE)
 
-#include <gpio.h>
-
 /*
  * Number of ticks to add at the end of scheduled item to reconfigure radio
  * after exiting from "external" slot.
@@ -57,9 +55,7 @@ extern void nrf_raal_timeslot_ended(void);
 static inline bool
 ble_ll_nrf_raal_slot_granted(void)
 {
-    uint8_t slot_type = ble_ll_sched_get_current_type();
-    return ((slot_type == BLE_LL_SCHED_TYPE_NRF_RAAL) ||
-	    ((slot_type == BLE_LL_SCHED_TYPE_NONE) && g_ble_ll_nrf_raal_continuous));
+    return ble_ll_sched_get_current_type() == BLE_LL_SCHED_TYPE_NRF_RAAL;
 }
 
 static void
@@ -74,7 +70,8 @@ ble_ll_nrf_raal_slot_schedule(void)
         return;
     }
 
-    sch->start_time = os_cputime_get32();
+    /* Start scheduling from last slot */
+    sch->start_time = sch->end_time;
     sch->end_time = sch->start_time +
                     ble_ll_usecs_to_ticks_round_up(MYNEWT_VAL(BLE_LL_NRF_RAAL_SLOT_LENGTH)) +
                     NRF_RAAL_SLOT_END_MARGIN_TICKS;
@@ -87,7 +84,6 @@ static void
 ble_ll_nrf_raal_slot_enter(void)
 {
     if (!g_ble_ll_nrf_raal_critical) {
-        //gpio_clear(LED_3);
         nrf_raal_timeslot_started();
         return;
     }
@@ -111,7 +107,6 @@ static void
 ble_ll_nrf_raal_slot_exit(void)
 {
     if (!g_ble_ll_nrf_raal_critical) {
-        //gpio_set(LED_3);
         nrf_raal_timeslot_ended();
         return;
     }
@@ -138,7 +133,7 @@ ble_ll_nrf_raal_slot_end_tmr_cb(void *arg)
     /* Schedule next slot */
     ble_ll_nrf_raal_slot_schedule();
 
-    ble_phy_rfclk_enable();
+//    ble_phy_rfclk_enable();
 }
 
 static int
@@ -158,8 +153,7 @@ ble_ll_nrf_raal_slot_sched_cb(struct ble_ll_sched_item *sch)
 void
 nrf_raal_init(void)
 {
-    //gpio_init(LED_3);
-    //gpio_set(LED_3);
+    /* XXX nothing to do? */
 }
 
 void
@@ -187,10 +181,9 @@ nrf_raal_continuous_mode_exit(void)
 {
     g_ble_ll_nrf_raal_continuous = 0;
 
-    if (nrf_raal_timeslot_is_granted()) {
-        //gpio_set(LED_3);
-        nrf_raal_timeslot_ended();
-    }
+    //if (nrf_raal_timeslot_is_granted()) {
+    //    nrf_raal_timeslot_ended();
+    //}
 }
 
 bool
@@ -253,6 +246,9 @@ ble_ll_nrf_raal_init(void)
 
     g_ble_ll_nrf_raal_slot_sched.sched_type = BLE_LL_SCHED_TYPE_NRF_RAAL;
     g_ble_ll_nrf_raal_slot_sched.sched_cb = ble_ll_nrf_raal_slot_sched_cb;
+
+    /* We'll start scheduling form here */
+    g_ble_ll_nrf_raal_slot_sched.end_time = os_cputime_get32();
 }
 
 #endif
