@@ -316,6 +316,8 @@ ble_hs_startup_set_evmask_tx(void)
             return rc;
         }
     }
+#else
+    (void)version;
 #endif
 
     return 0;
