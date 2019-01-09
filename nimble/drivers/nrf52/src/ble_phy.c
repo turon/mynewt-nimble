@@ -68,6 +68,9 @@ extern uint32_t g_nrf_irk_list[];
 /* To disable all radio interrupts */
 #define NRF_RADIO_IRQ_MASK_ALL  (0x34FF)
 
+/// was priority 0
+#define NRF_RADIO_IRQ_PRIORITY  (3)   /* 1 allows critical via PriMask(0) */
+
 /*
  * We configure the nrf with a 1 byte S0 field, 8 bit length field, and
  * zero bit S1 field. The preamble is 8 bits long.
@@ -1176,7 +1179,7 @@ ble_phy_rx_start_isr(void)
     return true;
 }
 
-static void
+void
 ble_phy_isr(void)
 {
     uint32_t irq_en;
@@ -1373,7 +1376,7 @@ ble_phy_nrf_radio_init(void)
     NRF_PPI->CHENSET = PPI_CHEN_CH26_Msk | PPI_CHEN_CH27_Msk;
 
     /* Set isr in vector table and enable interrupt */
-    NVIC_SetPriority(RADIO_IRQn, 0);
+    NVIC_SetPriority(RADIO_IRQn, NRF_RADIO_IRQ_PRIORITY);
 #if MYNEWT
     NVIC_SetVector(RADIO_IRQn, (uint32_t)ble_phy_isr);
 #else
@@ -1461,7 +1464,7 @@ ble_phy_init(void)
     NRF_PPI->CH[5].TEP = (uint32_t)&(NRF_RADIO->TASKS_DISABLE);
 
     /* Set isr in vector table and enable interrupt */
-    NVIC_SetPriority(RADIO_IRQn, 0);
+    NVIC_SetPriority(RADIO_IRQn, NRF_RADIO_IRQ_PRIORITY);
 #if MYNEWT
     NVIC_SetVector(RADIO_IRQn, (uint32_t)ble_phy_isr);
 #else
