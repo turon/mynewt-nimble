@@ -56,19 +56,17 @@ ble_npl_mutex_release(struct ble_npl_mutex *mu)
 ble_npl_error_t
 ble_npl_mutex_pend(struct ble_npl_mutex *mu, uint32_t timeout)
 {
-    struct timespec wait;
-
     if (!mu) {
         return BLE_NPL_INVALID_PARAM;
     }
 
     assert(&mu->lock);
 
-    wait.tv_sec  = timeout / 1000;
-    wait.tv_nsec = (timeout % 1000) * 1000000;
-    wait.tv_nsec %= 1000000000;
+    mu->wait.tv_sec  = timeout / 1000;
+    mu->wait.tv_nsec = (timeout % 1000) * 1000000;
+    mu->wait.tv_nsec %= 1000000000;
 
-    if (pthread_mutex_timedlock(&mu->lock, &wait)) {
+    if (pthread_mutex_timedlock(&mu->lock, &mu->wait)) {
         return BLE_NPL_TIMEOUT;
     }
 

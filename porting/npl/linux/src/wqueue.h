@@ -37,6 +37,7 @@ template <typename T> class wqueue
 public:
     wqueue()
     {
+        pthread_mutexattr_init(&m_mutex_attr);
         pthread_mutexattr_settype(&m_mutex_attr, PTHREAD_MUTEX_RECURSIVE);
         pthread_mutex_init(&m_mutex, &m_mutex_attr);
         pthread_cond_init(&m_condv, NULL);
