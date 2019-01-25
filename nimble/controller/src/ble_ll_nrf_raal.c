@@ -228,6 +228,15 @@ void
 nrf_raal_critical_section_exit(void)
 {
     g_ble_ll_nrf_raal_critical = 0;
+
+    if (g_ble_ll_nrf_raal_pending & BLE_LL_NRF_RAAL_PENDING_SLOT_ENTER) {
+        ble_ll_nrf_raal_slot_enter();
+    }
+    if (g_ble_ll_nrf_raal_pending & BLE_LL_NRF_RAAL_PENDING_SLOT_EXIT) {
+        ble_ll_nrf_raal_slot_exit();
+    }
+
+    g_ble_ll_nrf_raal_pending = 0;
 }
 
 void
